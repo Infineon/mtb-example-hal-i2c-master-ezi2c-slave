@@ -1,8 +1,11 @@
 /******************************************************************************
-* File Name: Interface.h
+* File Name: resource_map.h
+*
+* Description: This file gives the I2C SCL and SDA pin map for all the supported
+* kits.
 *
 *******************************************************************************
-* Copyright (2018-2019), Cypress Semiconductor Corporation. All rights reserved.
+* (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
 *******************************************************************************
 * This software, including source code, documentation and related materials
 * (“Software”), is owned by Cypress Semiconductor Corporation or one of its
@@ -32,10 +35,22 @@
 * system or application assumes all risk of such use and in doing so agrees to
 * indemnify Cypress against all liability.
 *******************************************************************************/
-#ifndef SOURCE_INTERFACE_H_
-#define SOURCE_INTERFACE_H_
 
-#define I2C_SUCCESS 		(0UL)
-#define I2C_FAILURE 		(1UL)
+#ifndef RESOURCE_MAP_H_
+#define RESOURCE_MAP_H_
 
-#endif /* SOURCE_INTERFACE_H_ */
+#define sI2C_SCL                    (CYBSP_I2C_SCL)
+#define sI2C_SDA                    (CYBSP_I2C_SDA)
+
+#if defined (TARGET_CY8CPROTO_062S3_4343W)      /* CY8CPROTO-063S2-4343W kit */
+    #define mI2C_SCL                (P5_0)
+    #define mI2C_SDA                (P5_1)
+#elif defined (TARGET_CYW9P62S1_43012EVB_01)    /* CYW9P62S1_43012EVB_01 kit */
+    #define mI2C_SCL                (P0_2)
+    #define mI2C_SDA                (P0_3)
+#else
+    #define mI2C_SCL                (P9_0)
+    #define mI2C_SDA                (P9_1)
+#endif
+
+#endif /* RESOURCE_MAP_H_ */
