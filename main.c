@@ -77,12 +77,9 @@
 /***************************************
 *          Global Variables
 ****************************************/
+#if ((I2C_MODE == I2C_MODE_BOTH) || (I2C_MODE == I2C_MODE_SLAVE))
 uint8_t ezi2c_buffer[EZI2C_BUFFER_SIZE] = {0};
-cyhal_i2c_t mI2C;
-cyhal_i2c_cfg_t mI2C_cfg;
-cyhal_ezi2c_t sEzI2C;
-cyhal_ezi2c_slave_cfg_t sEzI2C_sub_cfg;
-cyhal_ezi2c_cfg_t sEzI2C_cfg;
+#endif
 
 /*******************************************************************************
 * Function Name: handle_error
@@ -105,6 +102,7 @@ void handle_error(void)
     CY_ASSERT(0);
 }
 
+#if ((I2C_MODE == I2C_MODE_BOTH) || (I2C_MODE == I2C_MODE_SLAVE))
 /*******************************************************************************
 * Function Name: handle_slave_event
 ********************************************************************************
@@ -154,6 +152,7 @@ void handle_slave_event(void *callback_arg, cyhal_ezi2c_status_t event)
         }
     }
 }
+#endif
 
 /*******************************************************************************
 * Function Name: main
@@ -193,27 +192,15 @@ int main(void)
     printf("PSoC 6 MCU I2C Master EzI2C Slave\r\n");
     printf("*********************************\r\n\n");
 
+#if ((I2C_MODE == I2C_MODE_BOTH) || (I2C_MODE == I2C_MODE_SLAVE))
+    cyhal_ezi2c_t sEzI2C;
+    cyhal_ezi2c_slave_cfg_t sEzI2C_sub_cfg;
+    cyhal_ezi2c_cfg_t sEzI2C_cfg;
+
     /* Configure user LED */
     printf(">> Configuring user LED..... ");
     result = cyhal_gpio_init( CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, 
                               CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
-    if (result != CY_RSLT_SUCCESS)
-    {
-        handle_error();
-    }
-    printf("Done\r\n");
-
-    /* Configure I2C Master */
-    printf(">> Configuring I2C master..... ");
-    mI2C_cfg.is_slave = false;
-    mI2C_cfg.address = 0;
-    mI2C_cfg.frequencyhal_hz = CYHAL_EZI2C_DATA_RATE_400KHZ;
-    result = cyhal_i2c_init( &mI2C, mI2C_SDA, mI2C_SCL, NULL);
-    if (result != CY_RSLT_SUCCESS)
-    {
-        handle_error();
-    }
-    result = cyhal_i2c_configure( &mI2C, &mI2C_cfg);
     if (result != CY_RSLT_SUCCESS)
     {
         handle_error();
@@ -238,7 +225,7 @@ int main(void)
     {
         handle_error();
     }
-    printf("Done\r\n\n");
+    printf("Done\r\n");
 
     cyhal_ezi2c_register_callback( &sEzI2C, handle_slave_event, NULL);
     cyhal_ezi2c_enable_event( &sEzI2C,
@@ -246,17 +233,41 @@ int main(void)
                              | CYHAL_EZI2C_STATUS_WRITE1 
                              | CYHAL_EZI2C_STATUS_READ1),
                              I2C_SLAVE_IRQ_PRIORITY, true);
+#endif
 
+#if ((I2C_MODE == I2C_MODE_BOTH) || (I2C_MODE == I2C_MODE_MASTER))
+    cyhal_i2c_t mI2C;
+    cyhal_i2c_cfg_t mI2C_cfg;
     uint8_t cmd = CYBSP_LED_STATE_ON;
     uint8_t buffer[EZI2C_BUFFER_SIZE] = {0};
 
+    /* Configure I2C Master */
+    printf(">> Configuring I2C master..... ");
+    mI2C_cfg.is_slave = false;
+    mI2C_cfg.address = 0;
+    mI2C_cfg.frequencyhal_hz = CYHAL_EZI2C_DATA_RATE_400KHZ;
+    result = cyhal_i2c_init( &mI2C, mI2C_SDA, mI2C_SCL, NULL);
+    if (result != CY_RSLT_SUCCESS)
+    {
+        handle_error();
+    }
+    result = cyhal_i2c_configure( &mI2C, &mI2C_cfg);
+    if (result != CY_RSLT_SUCCESS)
+    {
+        handle_error();
+    }
+    printf("Done\r\n\n");
+#endif
     /* Enable interrupts */
     __enable_irq();
 
+#if ((I2C_MODE == I2C_MODE_BOTH) || (I2C_MODE == I2C_MODE_SLAVE))
     printf("User LED should start blinking \r\n");
+#endif
 
     for (;;)
     {
+#if ((I2C_MODE == I2C_MODE_BOTH) || (I2C_MODE == I2C_MODE_MASTER))
         /* create packet to be sent to slave.  */
         buffer[0] = 0;
         buffer[1] = PACKET_SOP;
@@ -289,5 +300,6 @@ int main(void)
             /* Give delay between commands. */
             cyhal_system_delay_ms(CMD_TO_CMD_DELAY);
         }
+#endif
     }
 }
