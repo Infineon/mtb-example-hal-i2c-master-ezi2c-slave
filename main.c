@@ -9,7 +9,7 @@
 *
 *
 *******************************************************************************
-* Copyright 2019-2021, Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright 2019-2022, Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 *
 * This software, including source code, documentation and related
@@ -41,7 +41,6 @@
 * so agrees to indemnify Cypress against all liability.
 *******************************************************************************/
 
-#include "cy_pdl.h"
 #include "cyhal.h"
 #include "cybsp.h"
 #include "cy_retarget_io.h"
@@ -160,7 +159,7 @@ void handle_slave_event(void *callback_arg, cyhal_ezi2c_status_t event)
 * Function Name: main
 ********************************************************************************
 * Summary:
-* This is the main function for CM4 CPU.
+* This is the main function.
 *   1. I2C Master sends command packet to the slave
 *   2. I2C Master reads the response packet to generate the next command
 *
@@ -191,7 +190,7 @@ int main(void)
     printf("\x1b[2J\x1b[;H");
 
     printf("*********************************\r\n");
-    printf("PSoC 6 MCU I2C Master EzI2C Slave\r\n");
+    printf("HAL: I2C Master EzI2C Slave\r\n");
     printf("*********************************\r\n\n");
 
 #if ((I2C_MODE == I2C_MODE_BOTH) || (I2C_MODE == I2C_MODE_SLAVE))
@@ -217,7 +216,7 @@ int main(void)
     sEzI2C_sub_cfg.slave_address = EzI2C_SLAVE_ADDR;
 
     sEzI2C_cfg.data_rate = CYHAL_EZI2C_DATA_RATE_400KHZ;
-    sEzI2C_cfg.enable_wake_from_sleep = true;
+    sEzI2C_cfg.enable_wake_from_sleep = false;
     sEzI2C_cfg.slave1_cfg = sEzI2C_sub_cfg;
     sEzI2C_cfg.sub_address_size = CYHAL_EZI2C_SUB_ADDR8_BITS;
     sEzI2C_cfg.two_addresses = false;
