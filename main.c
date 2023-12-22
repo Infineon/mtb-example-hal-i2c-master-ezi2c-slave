@@ -9,7 +9,7 @@
 *
 *
 *******************************************************************************
-* Copyright 2019-2022, Cypress Semiconductor Corporation (an Infineon company) or
+* Copyright 2019-2023, Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 *
 * This software, including source code, documentation and related
@@ -80,6 +80,14 @@
 ****************************************/
 #if ((I2C_MODE == I2C_MODE_BOTH) || (I2C_MODE == I2C_MODE_SLAVE))
 uint8_t ezi2c_buffer[EZI2C_BUFFER_SIZE] = {0};
+#endif
+
+#ifdef XMC7200D_E272K8384
+#define XMC_Series
+#endif
+
+#ifdef XMC7100D_F176K4160
+#define XMC_Series
 #endif
 
 /*******************************************************************************
@@ -179,12 +187,29 @@ int main(void)
     {
         handle_error();
     }
+
     result = cy_retarget_io_init( CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, 
                                   CY_RETARGET_IO_BAUDRATE);
     if (result != CY_RSLT_SUCCESS)
     {
         handle_error();
     }
+
+#if defined(XMC_Series)
+        printf("Configuring clock \r\n");
+        /*Configure clock settings for KIT_XMC72_EVK */
+        cyhal_clock_t clock_fll, clock_hf, clock_peri;
+        result = cyhal_clock_reserve(&clock_hf, &CYHAL_CLOCK_HF[0]);
+        result = cyhal_clock_reserve(&clock_fll, &CYHAL_CLOCK_FLL);
+        if(result == CY_RSLT_SUCCESS){
+        result = cyhal_clock_set_source(&clock_hf, &clock_fll);
+        }
+        /* Set divider to 1 for Peripheral Clock */
+        result = cyhal_clock_reserve(&clock_peri, CYHAL_CLOCK_PERI);
+        if(result == CY_RSLT_SUCCESS){
+        result = cyhal_clock_set_divider(&clock_peri,1);
+        }
+#endif
 
     /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
     printf("\x1b[2J\x1b[;H");
